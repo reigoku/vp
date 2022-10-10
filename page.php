@@ -1,8 +1,10 @@
 <?php
-	require_once "../config.php";
+	session_start();
+	require_once "../../config.php";
+	require_once "fnc_user.php";
 	$author_name = "Reigo Kurgpõld";
 	$full_time_now = date("d.m.Y H:i:s");
-	$weekday_now = date("N");
+	$weekday_now = date("n");
 	//echo $weekday_now
 	$weekdaynames_et = ["esmaspäev", "teisipäev", "kolmapäev", "neljapäev", "reede", "laupäev", "pühapäev"];
 	//echo $weekdaynames_et[$weekday_now - 1];
@@ -82,12 +84,13 @@
 		}
 	$comment_error = null;
 		//kas kilkiti päeva kommentaari nuppu
-	if(isset($_POST["comment_submit"]))
+	if(isset($_POST["comment_submit"])){
 		if(isset($_POST["comment_input"]) and !empty($_POST["comment_input"])){
 			$comment = $_POST["comment_input"];
 		} else {
 			$comment_error = "Kommentaar jäi kirjutamata";
 		}
+		
 		$grade = $_POST["grade_input"];
 		
 		if(empty($comment_error)){
@@ -111,6 +114,13 @@
 			//sulgeme andmebaasi
 			$conn->close();
 		}
+	}
+	$login_error = null;
+	if(isset($_POST["login_submit"])){
+        //login sisse
+		$login_error = sign_in($_POST["email_input"], $_POST["password_input"]);
+	}
+	
 	
 ?>
 <!DOCTYPE html>
@@ -123,9 +133,17 @@
 
 <img src="pics/vp_banner_gs.png">
 
-<h1>reigo kurgpõld kirjuatas selle</h1>
+<h1>reigo kurgpõld kirjutas selle</h1>
 <p>See leht on loodud õppetöö raames ja ei sisalda tõsiseltvõetavalt sisu.</p>
-
+<hr>
+<h2>Logi sisse</h2>
+<form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+	<input type="email" name="email_input" placeholder="Kasutajatunnus ehk e-post">
+	<input type="password" name="password_input" placeholder="salasõna">
+	<input type="submit" name="login_submit" value="Logi sisse"><span><strong><?php echo $login_error; ?></strong></span>
+</form>
+<p>Või <a href = "add_user.php"> loo</a> endale kasutaja</p>
+<hr>
 <p>õppetöö toimus <a href="https://www.tlu.ee/" target="_blank">Tallinna Ülikoolis</a> digitehnoloogiate instituudis</p>
 <p>Lehe avamise hetk: <?php echo $weekdaynames_et[$weekday_now - 1].", ".$full_time_now?></p>
 <p>Praegu on <?php echo $part_of_day ?> </p>
@@ -155,7 +173,4 @@
 </form>
 <hr>
 <?php echo $photo_html; ?>
-</hr>
-</body>
-
-</html>
+<?php require_once "footer.php"; ?>
